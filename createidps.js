@@ -165,8 +165,8 @@ httpGrabKeycloaktokenOnce().then(token => {
                     console.error('Missing otherContactIpaCode in configuration, cannot create SPID RSA Provider');
                     return of({status: 'error', detail: 'Missing otherContactIpaCode in configuration'});
                 }
-                const firstOrganizationName = config.organizationNames.split(',', 2)[0].split('|', 2)[0].trim();
-                const firstOrganizationDisplayName = config.organizationDisplayNames.split(',', 2)[0].split('|', 2)[0].trim();
+                const firstOrganizationName = config.organizationNames.split(',', 2)[0].split('|', 2)[1].trim();
+                const firstOrganizationDisplayName = config.organizationDisplayNames.split(',', 2)[0].split('|', 2)[1].trim();
                 const firstOrganizationUrl = config.organizationUrls.split(',', 2)[0].split('|', 2)[1].trim();
                 if (!firstOrganizationName || !firstOrganizationDisplayName || !firstOrganizationUrl) {
                     console.error('Missing organizationNames or organizationDisplayNames or organizationUrls in configuration, cannot create SPID RSA Provider');
