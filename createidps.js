@@ -9,9 +9,9 @@ const {
     httpCallKeycloakCreateAllMappers,
     httpGrabKeycloaktokenOnce,
     httpCallKeycloakGetRsaKeyPriority,
-    httpCallKeycloakGetSpidRsaProvider,
+    httpCallKeycloakGetRsaProviders,
     httpCallKeycloakCreateSpidRsaProvider,
-    httpCallKeycloakDeleteSpidRsaProvider
+    httpCallKeycloakDeleteProvider
 } = require('./src/http')
 
 
@@ -143,16 +143,28 @@ httpGrabKeycloaktokenOnce().then(token => {
     config.token = token;
     createKeycloackSpidIdPsMappers$.subscribe(console.log);
     if (config.createSpidRsaProvider === 'true') {
-        from(httpCallKeycloakGetSpidRsaProvider()).pipe(
-            mergeMap(existingSpidRsaProvider => {
+        from(httpCallKeycloakGetRsaProviders()).pipe(
+            mergeMap(existingSpidRsaProviders => {
+                const existingSpidRsaProvider = existingSpidRsaProviders.find(provider => provider.providerId === 'spid-rsa-generated');
                 const existingConfig = existingSpidRsaProvider?.config;
-                const deleteOrSkip$ = existingSpidRsaProvider
-                    ? from(httpCallKeycloakDeleteSpidRsaProvider(existingSpidRsaProvider.id)).pipe(
-                        map(deleteResponse => {
-                            return {status: deleteResponse.status, detail: 'Existing SPID RSA Provider deleted'};
-                        })
-                    )
-                    : of({status: 'skipped', detail: 'No existing SPID RSA Provider found, skipping deletion'});
+                var deleteOrSkip$ = of(null);
+                if (existingSpidRsaProviders.length > 0) {
+                    for (const provider of existingSpidRsaProviders) {
+                        deleteOrSkip$ = deleteOrSkip$.pipe(
+                            mergeMap(() => from(httpCallKeycloakDeleteProvider(provider.id)).pipe(
+                                map(response => {
+                                    if (response.status === 204) {
+                                        return {status: 'deleted', detail: `Deleted existing SPID RSA Provider with id ${provider.id}`};
+                                    } else {
+                                        return {status: 'error', detail: `Failed to delete existing SPID RSA Provider with id ${provider.id}, status code: ${response.status}`};
+                                    }
+                                }),
+                            ))
+                        );
+                    }
+                } else {
+                    deleteOrSkip$ = of({status: 'skipped', detail: 'No existing SPID RSA Provider found, skipping deletion'});
+                }
                 return deleteOrSkip$.pipe(
                     mergeMap(() => {
                         const spidRsaProviderConfig = existingConfig || {

@@ -239,7 +239,7 @@ exports.httpCallKeycloakGetRsaKeyPriority = function () {
     })
 }
 
-exports.httpCallKeycloakGetSpidRsaProvider = function () {
+exports.httpCallKeycloakGetRsaProviders = function () {
     return httpGrabKeycloaktoken().then(token => {
         let axiosConfig = {
             httpsAgent : agent,
@@ -254,7 +254,7 @@ exports.httpCallKeycloakGetSpidRsaProvider = function () {
             .catch(function (error) {
                 handleHttpError(error);
             })
-            .then(response => response.data.find(component => component.providerId === 'spid-rsa-generated'));
+            .then(response => response.data.filter(component => component.providerId === 'spid-rsa-generated' || component.providerId === 'rsa-generated'));
     })
 }
 
@@ -279,7 +279,7 @@ exports.httpCallKeycloakCreateSpidRsaProvider = function (providerModel) {
     })
 }
 
-exports.httpCallKeycloakDeleteSpidRsaProvider = function (id) {
+exports.httpCallKeycloakDeleteProvider = function (id) {
     return httpGrabKeycloaktoken().then(token => {
         let axiosConfig = {
             httpsAgent : agent,
