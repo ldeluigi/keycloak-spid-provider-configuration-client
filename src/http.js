@@ -253,6 +253,7 @@ exports.httpCallKeycloakGetRsaProviders = function () {
         return axios(axiosConfig)
             .catch(function (error) {
                 handleHttpError(error);
+                throw error;
             })
             .then(response => response.data.filter(component => component.providerId === 'spid-rsa-generated' || component.providerId === 'rsa-generated'));
     })
@@ -275,6 +276,7 @@ exports.httpCallKeycloakCreateSpidRsaProvider = function (providerModel) {
             .catch(function (error) {
                 console.error('Error creating SPID RSA provider');
                 handleHttpError(error);
+                throw error;
             });
     })
 }
